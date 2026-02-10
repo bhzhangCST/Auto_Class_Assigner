@@ -138,45 +138,53 @@ def parse_folder(folder_path: Path) -> Dict[str, pd.DataFrame]:
 
 
 def parse_nested_folder(folder_path: Path) -> Dict[str, pd.DataFrame]:
-    """Parse nested folder structure (grade folders containing class files)."""
+    """Recursively parse folder structure at any depth to find Excel files."""
     grade_data: Dict[str, List[pd.DataFrame]] = {}
-    
+
     grade_name_map = {
         '一': '1', '二': '2', '三': '3', '四': '4', '五': '5', '六': '6',
         '1': '1', '2': '2', '3': '3', '4': '4', '5': '5', '6': '6'
     }
-    
-    def process_file(file_path: Path, grade_hint: Optional[str] = None):
+
+    def get_grade_hint(file_path: Path) -> Optional[str]:
+        """Extract grade hint from any parent folder name."""
+        for parent in file_path.parents:
+            if parent == folder_path:
+                break
+            for key in grade_name_map:
+                if key in parent.name:
+                    return parent.name
+        return None
+
+    def process_file(file_path: Path):
         if file_path.suffix.lower() not in ['.xlsx', '.xls']:
             return
-            
+
         df = parse_excel_file(file_path)
         if df is None:
             return
-            
-        if grade_hint and df['年级'].iloc[0] == 'unknown':
-            for key, val in grade_name_map.items():
-                if key in grade_hint:
-                    df['年级'] = val
-                    break
-        
+
+        if df['年级'].iloc[0] == 'unknown':
+            grade_hint = get_grade_hint(file_path)
+            if grade_hint:
+                for key, val in grade_name_map.items():
+                    if key in grade_hint:
+                        df['年级'] = val
+                        break
+
         grade = df['年级'].iloc[0]
         if grade not in grade_data:
             grade_data[grade] = []
         grade_data[grade].append(df)
-    
-    for item in folder_path.iterdir():
-        if item.is_file():
-            process_file(item)
-        elif item.is_dir():
-            grade_hint = item.name
-            for file_path in item.iterdir():
-                if file_path.is_file():
-                    process_file(file_path, grade_hint)
-    
+
+    # Recursively walk all subdirectories
+    for file_path in folder_path.rglob('*'):
+        if file_path.is_file():
+            process_file(file_path)
+
     result = {}
     for grade, dfs in grade_data.items():
         if dfs:
             result[grade] = pd.concat(dfs, ignore_index=True)
-    
+
     return result
