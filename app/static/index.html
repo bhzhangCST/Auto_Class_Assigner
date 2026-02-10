@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生成绩自动分班系统</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📊</div>
+                <h1>ACA：智能分班系统</h1>
+            </div>
+            <p class="subtitle">基于均衡蛇形算法的智能分班工具</p>
+        </header>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 上传区域 -->
+            <section class="upload-section" id="uploadSection">
+                <div class="upload-card">
+                    <div class="upload-icon">📁</div>
+                    <h2>选择成绩文件夹</h2>
+                    <p class="upload-hint">支持包含多个年级的嵌套文件夹结构</p>
+                    <p class="upload-hint">文件格式：年级.班级.xlsx（如 3.1.xlsx）</p>
+
+                    <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
+
+                    <button class="btn btn-primary" id="selectFolderBtn">
+                        <span class="btn-icon">📂</span>
+                        选择文件夹
+                    </button>
+
+                    <div class="selected-info" id="selectedInfo" style="display: none;">
+                        <span class="info-icon">✅</span>
+                        <span id="fileCount">0</span> 个文件已选择
+                    </div>
+
+                    <button class="btn btn-success" id="uploadBtn" style="display: none;">
+                        <span class="btn-icon">🚀</span>
+                        开始分班
+                    </button>
+                </div>
+            </section>
+
+            <!-- 处理进度 -->
+            <section class="progress-section" id="progressSection" style="display: none;">
+                <div class="progress-card">
+                    <div class="spinner"></div>
+                    <h2>正在处理...</h2>
+                    <p id="progressText">正在解析文件并执行分班算法</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 结果展示 -->
+            <section class="result-section" id="resultSection" style="display: none;">
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-icon">🎉</div>
+                        <h2>分班完成！</h2>
+                        <p id="resultSummary">处理结果摘要</p>
+                    </div>
+
+                    <div class="result-list" id="resultList">
+                        <!-- 动态生成结果列表 -->
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="downloadAllBtn">
+                            <span class="btn-icon">📦</span>
+                            打包下载全部
+                        </button>
+                        <button class="btn btn-secondary" id="restartBtn">
+                            <span class="btn-icon">🔄</span>
+                            重新开始
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 错误提示 -->
+            <section class="error-section" id="errorSection" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon">❌</div>
+                    <h2>处理失败</h2>
+                    <p id="errorMessage">发生未知错误</p>
+                    <button class="btn btn-secondary" id="retryBtn">
+                        <span class="btn-icon">🔄</span>
+                        重试
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>均衡蛇形分班算法 · 确保各班总分和各科成绩均衡</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
