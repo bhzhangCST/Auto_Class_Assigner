@@ -9,8 +9,12 @@
 **本地部署**
 若从源码本地部署，推荐使用conda:
 ```bash
-conda create -n aca python==3.10 -y
-conda activate aca
+conda create -n aca python==3.10 -y & conda activate aca
+git clone https://github.com/bhzhangCST/Auto_Class_Assigner.git
+cd auto_class_aggisner & pip install -r requirements.txt
+```
+之后，执行
+```bash
 python -m uvicorn app.main:app --reload --port 8000
 ```
-之后，可以从`http://localhost:8000`访问并使用。
+并从`http://localhost:8000`访问使用。
