@@ -13,23 +13,15 @@ def auto_detect_headers(df: pd.DataFrame) -> Dict[str, str]:
     """Auto-detect and standardize column headers."""
     column_mapping = {}
     
-    id_patterns = ['考号', '学号', '编号', 'id', '序号']
-    name_patterns = ['姓名', '名字', '学生姓名', 'name']
+    id_patterns = ['考号', '学号', '编号', '序号']
+    name_patterns = ['姓名', '名字', '学生姓名']
     subject_patterns = ['语文', '数学', '英语', '科学', '道法', '品德', '体育', '音乐', '美术']
     
     for idx, col in enumerate(df.columns):
         col_str = str(col).strip().lower()
         
-        if any(p in col_str for p in id_patterns):
-            column_mapping[col] = '考号'
-        elif any(p in col_str for p in name_patterns):
-            column_mapping[col] = '姓名'
-        elif any(p in col_str for p in subject_patterns):
-            for p in subject_patterns:
-                if p in col_str:
-                    column_mapping[col] = p
-                    break
-        elif 'unnamed' in col_str:
+        # Handle unnamed columns first (by position + content heuristics)
+        if 'unnamed' in col_str:
             sample_data = df[col].dropna().head(10)
             if len(sample_data) == 0:
                 continue
@@ -43,6 +35,18 @@ def auto_detect_headers(df: pd.DataFrame) -> Dict[str, str]:
             else:
                 if pd.api.types.is_numeric_dtype(sample_data):
                     column_mapping[col] = f'科目{idx-1}'
+            continue
+        
+        # Named columns: match by known patterns
+        if any(p in col_str for p in id_patterns):
+            column_mapping[col] = '考号'
+        elif any(p in col_str for p in name_patterns):
+            column_mapping[col] = '姓名'
+        elif any(p in col_str for p in subject_patterns):
+            for p in subject_patterns:
+                if p in col_str:
+                    column_mapping[col] = p
+                    break
     
     return column_mapping
 
