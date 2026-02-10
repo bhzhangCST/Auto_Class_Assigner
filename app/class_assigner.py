@@ -30,21 +30,27 @@ def calculate_total_score(df: pd.DataFrame, subject_cols: List[str]) -> pd.Serie
 
 def separate_special_students(df: pd.DataFrame, subject_cols: List[str]) -> Tuple[pd.DataFrame, Optional[pd.DataFrame]]:
     """
-    Separate students with ALL subject scores non-numeric (absent, long-term leave, etc.).
+    Separate students who should not participate in class assignment:
+    - All subject scores are non-numeric (absent, long-term leave, etc.)
+    - All subject scores are 0
     Returns (normal_df, special_df). special_df is None if no special students.
     """
-    def is_all_non_numeric(row):
+    def is_special(row):
+        all_zero = True
         for col in subject_cols:
             val = row[col]
             if pd.notna(val):
                 try:
-                    float(val)
-                    return False
+                    v = float(val)
+                    if v != 0:
+                        all_zero = False
+                        return False
                 except (ValueError, TypeError):
+                    all_zero = False
                     continue
-        return True
+        return True  # all non-numeric OR all zero/missing
 
-    mask = df.apply(is_all_non_numeric, axis=1)
+    mask = df.apply(is_special, axis=1)
     special_df = df[mask].copy() if mask.any() else None
     normal_df = df[~mask].copy()
 
