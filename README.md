@@ -17,4 +17,4 @@ cd auto_class_aggisner & pip install -r requirements.txt
 ```bash
 python -m uvicorn app.main:app --reload --port 8000
 ```
-并从`http://localhost:8000`访问使用。
+并从`http://localhost:8000`访问及使用。
