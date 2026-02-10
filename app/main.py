@@ -5,6 +5,7 @@ Student Grade Auto Class Assignment System - FastAPI Main Entry
 import os
 import shutil
 import uuid
+import threading
 from pathlib import Path
 from typing import List
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -36,6 +37,23 @@ OUTPUT_DIR = BASE_DIR / "output"
 
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
+
+CLEANUP_DELAY = 300  # 5 minutes
+
+
+def schedule_cleanup(session_id: str):
+    """Schedule session file cleanup after CLEANUP_DELAY seconds."""
+    def do_cleanup():
+        session_dir = OUTPUT_DIR / session_id
+        zip_path = OUTPUT_DIR / f"{session_id}.zip"
+        if session_dir.exists():
+            shutil.rmtree(session_dir, ignore_errors=True)
+        if zip_path.exists():
+            zip_path.unlink(missing_ok=True)
+    
+    timer = threading.Timer(CLEANUP_DELAY, do_cleanup)
+    timer.daemon = True
+    timer.start()
 
 static_path = Path(__file__).parent / "static"
 if static_path.exists():
@@ -124,11 +142,13 @@ async def upload_files(files: List[UploadFile] = File(...)):
 
 @app.get("/download/{session_id}/{filename}")
 async def download_file(session_id: str, filename: str):
-    """Download result file."""
+    """Download result file and schedule cleanup."""
     file_path = OUTPUT_DIR / session_id / filename
     
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="文件不存在")
+    
+    schedule_cleanup(session_id)
     
     return FileResponse(
         path=file_path,
@@ -139,7 +159,7 @@ async def download_file(session_id: str, filename: str):
 
 @app.get("/download-all/{session_id}")
 async def download_all(session_id: str):
-    """Download all result files as ZIP."""
+    """Download all result files as ZIP and schedule cleanup."""
     session_dir = OUTPUT_DIR / session_id
     
     if not session_dir.exists():
@@ -147,6 +167,8 @@ async def download_all(session_id: str):
     
     zip_path = OUTPUT_DIR / f"{session_id}.zip"
     shutil.make_archive(str(zip_path.with_suffix('')), 'zip', session_dir)
+    
+    schedule_cleanup(session_id)
     
     return FileResponse(
         path=zip_path,
