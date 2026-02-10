@@ -1,161 +1,102 @@
-/* ===== 全局变量 ===== */
 :root {
-    --primary-color: #6366f1;
-    --primary-hover: #4f46e5;
-    --success-color: #10b981;
-    --success-hover: #059669;
-    --error-color: #ef4444;
-    --warning-color: #f59e0b;
-    
-    --bg-dark: #0f172a;
-    --bg-card: rgba(30, 41, 59, 0.8);
-    --bg-glass: rgba(255, 255, 255, 0.05);
-    
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    
-    --border-color: rgba(255, 255, 255, 0.1);
-    --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
-    
+    --primary: #4f6ef7;
+    --primary-hover: #3b5de7;
+    --primary-light: #eef1fd;
+    --success: #34a853;
+    --success-light: #e6f4ea;
+    --error: #ea4335;
+    --error-light: #fce8e6;
+
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --border: #e2e5f1;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 20px rgba(0,0,0,0.1);
+
+    --text: #1a1a2e;
+    --text-secondary: #5f6b7a;
+    --text-muted: #9ca3af;
+
+    --radius: 12px;
     --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    
-    --transition: all 0.3s ease;
+    --transition: all 0.25s ease;
 }
 
-/* ===== 重置样式 ===== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: 'Inter', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-    background: var(--bg-dark);
-    color: var(--text-primary);
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
     line-height: 1.6;
 }
 
-/* ===== 背景效果 ===== */
-body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-}
-
-/* ===== 容器 ===== */
 .container {
-    max-width: 800px;
+    max-width: 720px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 48px 20px 32px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* ===== 头部 ===== */
+/* Header */
 .header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 36px;
 }
 
 .logo {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    margin-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 8px;
 }
 
-.logo-icon {
-    font-size: 48px;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-}
+.logo-icon { font-size: 36px; }
 
 .header h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-color), var(--success-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
 }
 
 .subtitle {
-    color: var(--text-secondary);
-    font-size: 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
 }
 
-/* ===== 主内容 ===== */
-.main-content {
-    flex: 1;
-}
-
-/* ===== 卡片通用样式 ===== */
-.upload-card,
-.progress-card,
-.result-card,
-.error-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 40px;
+/* Cards */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px;
     text-align: center;
-    box-shadow: var(--shadow-glow);
-    animation: fadeIn 0.5s ease;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.4s ease;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== 上传区域 ===== */
-.upload-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-    animation: pulse 2s ease-in-out infinite;
-}
+/* Upload */
+.upload-icon { font-size: 48px; margin-bottom: 16px; }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-.upload-card h2 {
-    font-size: 1.5rem;
-    margin-bottom: 12px;
+.card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: var(--text);
 }
 
 .upload-hint {
     color: var(--text-muted);
-    font-size: 0.875rem;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
 }
 
 .selected-info {
@@ -163,264 +104,287 @@ body::before {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin: 20px 0;
-    padding: 12px 24px;
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    border-radius: var(--radius-md);
-    color: var(--success-color);
+    margin: 16px 0;
+    padding: 10px 20px;
+    background: var(--success-light);
+    border: 1px solid #b7dfbf;
+    border-radius: var(--radius-sm);
+    color: var(--success);
     font-weight: 500;
+    font-size: 0.9rem;
 }
 
-/* ===== 按钮 ===== */
+/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 14px 28px;
+    gap: 6px;
+    padding: 12px 24px;
     border: none;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    margin: 8px;
+    margin: 6px;
 }
 
-.btn-icon {
-    font-size: 1.2em;
-}
+.btn-icon { font-size: 1.1em; }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-color), #818cf8);
-    color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    background: var(--primary);
+    color: #fff;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79,110,247,0.3);
 }
 
 .btn-success {
-    background: linear-gradient(135deg, var(--success-color), #34d399);
-    color: white;
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    background: var(--success);
+    color: #fff;
 }
 
 .btn-success:hover {
-    background: linear-gradient(135deg, var(--success-hover), var(--success-color));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+    background: #2d9249;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(52,168,83,0.3);
 }
 
 .btn-secondary {
-    background: var(--bg-glass);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
+    background: var(--bg);
+    transform: translateY(-1px);
 }
 
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
 }
 
-/* ===== 进度条 ===== */
-.progress-card h2 {
-    margin: 20px 0 12px;
+/* Config Section */
+.config-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.4s ease;
+    text-align: left;
 }
 
-.spinner {
+.config-card h2 {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.grade-config {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.grade-config-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.grade-config-header h3 {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grade-config-header .tag {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: #fff;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+}
+
+.class-config-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.config-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.config-field label {
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.config-field input {
     width: 60px;
-    height: 60px;
-    border: 4px solid var(--border-color);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+    outline: none;
+    transition: var(--transition);
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+.config-field input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79,110,247,0.1);
 }
+
+.class-size-preview {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.config-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Progress */
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .progress-bar {
     width: 100%;
-    height: 8px;
-    background: var(--bg-glass);
-    border-radius: 4px;
-    margin-top: 24px;
+    height: 6px;
+    background: var(--bg);
+    border-radius: 3px;
+    margin-top: 20px;
     overflow: hidden;
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    border-radius: 3px;
     width: 0%;
     transition: width 0.5s ease;
-    animation: progressPulse 1.5s ease-in-out infinite;
 }
 
-@keyframes progressPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
+/* Results */
+.result-header { margin-bottom: 24px; }
+.result-icon { font-size: 48px; display: block; margin-bottom: 12px; }
 
-/* ===== 结果区域 ===== */
-.result-header {
-    margin-bottom: 30px;
-}
-
-.result-icon {
-    font-size: 64px;
-    display: block;
-    margin-bottom: 16px;
-    animation: bounce 1s ease;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-}
-
-.result-list {
-    margin: 24px 0;
-}
+.result-list { margin: 20px 0; }
 
 .result-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    background: var(--bg-glass);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    margin-bottom: 12px;
+    padding: 14px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
     transition: var(--transition);
 }
 
 .result-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateX(4px);
+    box-shadow: var(--shadow-hover);
+    transform: translateX(2px);
 }
 
 .grade-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
-.grade-icon {
-    font-size: 1.5rem;
-}
+.grade-icon { font-size: 1.3rem; }
 
 .grade-details h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .grade-details p {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
 }
 
-.download-buttons {
-    display: flex;
-    gap: 8px;
-}
-
 .btn-download {
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    background: rgba(99, 102, 241, 0.2);
-    color: var(--primary-color);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    border-radius: var(--radius-sm);
+    padding: 7px 14px;
+    font-size: 0.85rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    border: 1px solid #d3dafb;
+    border-radius: 6px;
     cursor: pointer;
     transition: var(--transition);
+    font-weight: 500;
 }
 
 .btn-download:hover {
-    background: rgba(99, 102, 241, 0.3);
+    background: #dce2fb;
 }
 
 .action-buttons {
-    margin-top: 24px;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
 }
 
-/* ===== 错误区域 ===== */
-.error-card {
-    border-color: rgba(239, 68, 68, 0.3);
-}
+/* Error */
+.error-card { border-color: #f5c6c0; }
+.error-icon { font-size: 48px; margin-bottom: 12px; }
+.error-card h2 { color: var(--error); }
+#errorMessage { color: var(--text-secondary); margin-bottom: 20px; }
 
-.error-icon {
-    font-size: 64px;
-    margin-bottom: 16px;
-}
-
-.error-card h2 {
-    color: var(--error-color);
-    margin-bottom: 12px;
-}
-
-#errorMessage {
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-}
-
-/* ===== 页脚 ===== */
+/* Footer */
 .footer {
     text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+    padding-top: 24px;
     color: var(--text-muted);
-    font-size: 0.875rem;
+    font-size: 0.8rem;
 }
 
-/* ===== 响应式 ===== */
+/* Responsive */
 @media (max-width: 600px) {
-    .container {
-        padding: 20px 16px;
-    }
-    
-    .header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .logo {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .upload-card,
-    .progress-card,
-    .result-card,
-    .error-card {
-        padding: 24px 16px;
-    }
-    
+    .container { padding: 24px 16px; }
+    .header h1 { font-size: 1.3rem; }
+    .logo { gap: 8px; }
+    .card, .config-card { padding: 24px 16px; }
     .result-item {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         text-align: center;
     }
-    
-    .download-buttons {
-        width: 100%;
-        justify-content: center;
-    }
+    .class-config-row { flex-direction: column; align-items: flex-start; }
 }

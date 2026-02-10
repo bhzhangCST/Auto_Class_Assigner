@@ -1,54 +1,33 @@
 /**
- * 学生成绩自动分班系统 - 前端脚本
+ * ACA Smart Class Assignment System - Frontend Script
+ * Two-step flow: upload → configure class sizes → process
  */
 
-// DOM 元素
-const folderInput = document.getElementById('folderInput');
-const selectFolderBtn = document.getElementById('selectFolderBtn');
-const uploadBtn = document.getElementById('uploadBtn');
-const selectedInfo = document.getElementById('selectedInfo');
-const fileCount = document.getElementById('fileCount');
-
-const uploadSection = document.getElementById('uploadSection');
-const progressSection = document.getElementById('progressSection');
-const resultSection = document.getElementById('resultSection');
-const errorSection = document.getElementById('errorSection');
-
-const progressFill = document.getElementById('progressFill');
-const progressText = document.getElementById('progressText');
-const resultList = document.getElementById('resultList');
-const resultSummary = document.getElementById('resultSummary');
-const errorMessage = document.getElementById('errorMessage');
-
-const downloadAllBtn = document.getElementById('downloadAllBtn');
-const restartBtn = document.getElementById('restartBtn');
-const retryBtn = document.getElementById('retryBtn');
-
-// 状态变量
 let selectedFiles = [];
 let currentSessionId = null;
+let gradeInfo = [];
 
-// 初始化
+const sections = ['uploadSection', 'configSection', 'progressSection', 'resultSection', 'errorSection'];
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 绑定事件
-    selectFolderBtn.addEventListener('click', () => folderInput.click());
-    folderInput.addEventListener('change', handleFolderSelect);
-    uploadBtn.addEventListener('click', handleUpload);
-    downloadAllBtn.addEventListener('click', handleDownloadAll);
-    restartBtn.addEventListener('click', handleRestart);
-    retryBtn.addEventListener('click', handleRestart);
+    document.getElementById('selectFolderBtn').addEventListener('click', () => document.getElementById('folderInput').click());
+    document.getElementById('folderInput').addEventListener('change', handleFolderSelect);
+    document.getElementById('uploadBtn').addEventListener('click', handleUpload);
+    document.getElementById('startAssignBtn').addEventListener('click', handleStartAssign);
+    document.getElementById('backBtn').addEventListener('click', () => showSection('uploadSection'));
+    document.getElementById('downloadAllBtn').addEventListener('click', handleDownloadAll);
+    document.getElementById('restartBtn').addEventListener('click', handleRestart);
+    document.getElementById('retryBtn').addEventListener('click', handleRestart);
 });
 
-/**
- * 处理文件夹选择
- */
-function handleFolderSelect(event) {
-    const files = Array.from(event.target.files);
+function showSection(id) {
+    sections.forEach(s => document.getElementById(s).style.display = s === id ? 'block' : 'none');
+}
 
-    // 过滤 Excel 文件
-    selectedFiles = files.filter(file => {
-        const ext = file.name.toLowerCase();
-        return ext.endsWith('.xlsx') || ext.endsWith('.xls');
+function handleFolderSelect(event) {
+    selectedFiles = Array.from(event.target.files).filter(f => {
+        const name = f.name.toLowerCase();
+        return name.endsWith('.xlsx') || name.endsWith('.xls');
     });
 
     if (selectedFiles.length === 0) {
@@ -56,191 +35,224 @@ function handleFolderSelect(event) {
         return;
     }
 
-    // 显示选择信息
-    fileCount.textContent = selectedFiles.length;
-    selectedInfo.style.display = 'flex';
-    uploadBtn.style.display = 'inline-flex';
-
-    // 添加动画
-    selectedInfo.classList.add('animate-in');
-    uploadBtn.classList.add('animate-in');
+    document.getElementById('fileCount').textContent = selectedFiles.length;
+    document.getElementById('selectedInfo').style.display = 'flex';
+    document.getElementById('uploadBtn').style.display = 'inline-flex';
 }
 
 /**
- * 处理上传
+ * Step 1: Upload files and get grade info for configuration
  */
 async function handleUpload() {
-    if (selectedFiles.length === 0) {
-        alert('请先选择文件夹');
-        return;
-    }
+    if (selectedFiles.length === 0) return alert('请先选择文件夹');
 
-    // 切换到进度视图
-    showSection('progress');
-    updateProgress(10, '正在上传文件...');
+    showSection('progressSection');
+    updateProgress(20, '正在上传并解析文件...');
 
     try {
-        // 创建 FormData
         const formData = new FormData();
-
         for (const file of selectedFiles) {
-            // 保持相对路径
-            const relativePath = file.webkitRelativePath || file.name;
-            formData.append('files', file, relativePath);
+            formData.append('files', file, file.webkitRelativePath || file.name);
         }
 
-        updateProgress(30, '正在解析成绩文件...');
-
-        // 发送请求
-        const response = await fetch('/upload', {
-            method: 'POST',
-            body: formData
-        });
-
-        updateProgress(60, '正在执行分班算法...');
-
+        const response = await fetch('/upload-preview', { method: 'POST', body: formData });
         if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || '上传失败');
+            const err = await response.json();
+            throw new Error(err.detail || '上传失败');
         }
 
         const data = await response.json();
+        currentSessionId = data.session_id;
+        gradeInfo = data.grades;
 
-        updateProgress(90, '正在生成结果文件...');
-
-        // 短暂延迟以显示动画
-        await sleep(500);
-
-        updateProgress(100, '分班完成！');
-
-        // 显示结果
+        updateProgress(100, '解析完成！');
         await sleep(300);
-        showResults(data);
-
+        showConfigUI(data.grades);
     } catch (error) {
-        console.error('Error:', error);
         showError(error.message);
     }
 }
 
 /**
- * 显示结果
+ * Show class size configuration UI for each grade
  */
-function showResults(data) {
-    currentSessionId = data.session_id;
+function showConfigUI(grades) {
+    const container = document.getElementById('gradeConfigList');
+    container.innerHTML = '';
 
-    // 更新摘要
-    resultSummary.textContent = data.message;
+    grades.forEach(g => {
+        const div = document.createElement('div');
+        div.className = 'grade-config';
+        div.dataset.grade = g.grade;
 
-    // 清空并生成结果列表
-    resultList.innerHTML = '';
-
-    const gradeIcons = ['📚', '📖', '📕', '📗', '📘', '📙'];
-
-    data.results.forEach((result, index) => {
-        const icon = gradeIcons[index % gradeIcons.length];
-
-        const itemHtml = `
-            <div class="result-item">
-                <div class="grade-info">
-                    <span class="grade-icon">${icon}</span>
-                    <div class="grade-details">
-                        <h3>${result.grade}年级</h3>
-                        <p>${result.student_count} 名学生 · ${result.class_count} 个班级</p>
-                    </div>
+        div.innerHTML = `
+            <div class="grade-config-header">
+                <h3>📚 ${g.grade_name}年级</h3>
+                <span class="tag">${g.student_count} 人 · 原 ${g.original_classes} 班</span>
+            </div>
+            <div class="class-config-row">
+                <div class="config-field">
+                    <label>大班</label>
+                    <input type="number" class="big-count" value="${g.original_classes}" min="0" max="50"
+                           data-grade="${g.grade}" onchange="updatePreview('${g.grade}')">
+                    <label>个</label>
                 </div>
-                <div class="download-buttons">
-                    <button class="btn-download" onclick="downloadFile('${result.result_file}')">
-                        📥 下载分班结果
-                    </button>
+                <div class="config-field">
+                    <label>小班</label>
+                    <input type="number" class="small-count" value="0" min="0" max="50"
+                           data-grade="${g.grade}" onchange="updatePreview('${g.grade}')">
+                    <label>个</label>
+                </div>
+                <div class="config-field">
+                    <label>小班人数</label>
+                    <input type="number" class="small-size" value="${Math.floor(g.student_count / g.original_classes * 0.7)}" min="1" max="200"
+                           data-grade="${g.grade}" onchange="updatePreview('${g.grade}')">
+                    <label>人</label>
                 </div>
             </div>
+            <div class="class-size-preview" id="preview-${g.grade}"></div>
         `;
 
-        resultList.innerHTML += itemHtml;
+        container.appendChild(div);
+        updatePreview(g.grade);
     });
 
-    showSection('result');
+    showSection('configSection');
 }
 
 /**
- * 下载单个文件
+ * Update the class size preview text
  */
+function updatePreview(grade) {
+    const g = gradeInfo.find(x => x.grade === grade);
+    if (!g) return;
+
+    const bigCount = parseInt(document.querySelector(`.big-count[data-grade="${grade}"]`).value) || 0;
+    const smallCount = parseInt(document.querySelector(`.small-count[data-grade="${grade}"]`).value) || 0;
+    const smallSize = parseInt(document.querySelector(`.small-size[data-grade="${grade}"]`).value) || 0;
+    const preview = document.getElementById(`preview-${grade}`);
+
+    const totalClasses = bigCount + smallCount;
+    if (totalClasses === 0) {
+        preview.textContent = '⚠️ 班级数量不能为 0';
+        return;
+    }
+
+    let bigSize;
+    if (smallCount > 0) {
+        const remaining = g.student_count - smallCount * smallSize;
+        bigSize = bigCount > 0 ? Math.round(remaining / bigCount) : 0;
+    } else {
+        bigSize = Math.round(g.student_count / bigCount);
+    }
+
+    let text = `预计：`;
+    if (bigCount > 0) text += `大班 ${bigCount} 个（约 ${bigSize} 人/班）`;
+    if (bigCount > 0 && smallCount > 0) text += `，`;
+    if (smallCount > 0) text += `小班 ${smallCount} 个（${smallSize} 人/班）`;
+    text += `，共 ${totalClasses} 个班`;
+
+    preview.textContent = text;
+}
+
+/**
+ * Step 2: Start assignment with configured class sizes
+ */
+async function handleStartAssign() {
+    const configs = {};
+
+    gradeInfo.forEach(g => {
+        configs[g.grade] = {
+            big_count: parseInt(document.querySelector(`.big-count[data-grade="${g.grade}"]`).value) || 0,
+            small_count: parseInt(document.querySelector(`.small-count[data-grade="${g.grade}"]`).value) || 0,
+            small_size: parseInt(document.querySelector(`.small-size[data-grade="${g.grade}"]`).value) || 0,
+        };
+    });
+
+    showSection('progressSection');
+    updateProgress(30, '正在执行分班算法...');
+
+    try {
+        const response = await fetch('/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: currentSessionId, configs })
+        });
+
+        updateProgress(80, '正在生成结果...');
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || '处理失败');
+        }
+
+        const data = await response.json();
+        updateProgress(100, '分班完成！');
+        await sleep(400);
+        showResults(data);
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+function showResults(data) {
+    currentSessionId = data.session_id;
+    document.getElementById('resultSummary').textContent = data.message;
+
+    const list = document.getElementById('resultList');
+    list.innerHTML = '';
+
+    const icons = ['📚', '📖', '📕', '📗', '📘', '📙'];
+
+    data.results.forEach((r, i) => {
+        list.innerHTML += `
+            <div class="result-item">
+                <div class="grade-info">
+                    <span class="grade-icon">${icons[i % icons.length]}</span>
+                    <div class="grade-details">
+                        <h3>${r.grade}年级</h3>
+                        <p>${r.student_count} 名学生 · ${r.class_count} 个班级</p>
+                    </div>
+                </div>
+                <button class="btn-download" onclick="downloadFile('${r.result_file}')">📥 下载分班结果</button>
+            </div>
+        `;
+    });
+
+    showSection('resultSection');
+}
+
 function downloadFile(filename) {
-    if (!currentSessionId) {
-        alert('会话已过期，请重新上传');
-        return;
-    }
-
-    const url = `/download/${currentSessionId}/${filename}`;
-    window.location.href = url;
+    if (!currentSessionId) return alert('会话已过期，请重新上传');
+    window.location.href = `/download/${currentSessionId}/${filename}`;
 }
 
-/**
- * 下载全部文件
- */
 function handleDownloadAll() {
-    if (!currentSessionId) {
-        alert('会话已过期，请重新上传');
-        return;
-    }
-
-    const url = `/download-all/${currentSessionId}`;
-    window.location.href = url;
+    if (!currentSessionId) return alert('会话已过期，请重新上传');
+    window.location.href = `/download-all/${currentSessionId}`;
 }
 
-/**
- * 重新开始
- */
 function handleRestart() {
-    // 清理会话
     if (currentSessionId) {
-        fetch(`/cleanup/${currentSessionId}`, { method: 'DELETE' })
-            .catch(console.error);
+        fetch(`/cleanup/${currentSessionId}`, { method: 'DELETE' }).catch(console.error);
     }
-
-    // 重置状态
     selectedFiles = [];
     currentSessionId = null;
-    folderInput.value = '';
-    selectedInfo.style.display = 'none';
-    uploadBtn.style.display = 'none';
-
-    // 返回上传视图
-    showSection('upload');
+    gradeInfo = [];
+    document.getElementById('folderInput').value = '';
+    document.getElementById('selectedInfo').style.display = 'none';
+    document.getElementById('uploadBtn').style.display = 'none';
+    showSection('uploadSection');
 }
 
-/**
- * 显示错误
- */
 function showError(message) {
-    errorMessage.textContent = message;
-    showSection('error');
+    document.getElementById('errorMessage').textContent = message;
+    showSection('errorSection');
 }
 
-/**
- * 切换显示区域
- */
-function showSection(section) {
-    uploadSection.style.display = section === 'upload' ? 'block' : 'none';
-    progressSection.style.display = section === 'progress' ? 'block' : 'none';
-    resultSection.style.display = section === 'result' ? 'block' : 'none';
-    errorSection.style.display = section === 'error' ? 'block' : 'none';
-}
-
-/**
- * 更新进度
- */
 function updateProgress(percent, text) {
-    progressFill.style.width = `${percent}%`;
-    if (text) {
-        progressText.textContent = text;
-    }
+    document.getElementById('progressFill').style.width = `${percent}%`;
+    if (text) document.getElementById('progressText').textContent = text;
 }
 
-/**
- * 延迟函数
- */
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }

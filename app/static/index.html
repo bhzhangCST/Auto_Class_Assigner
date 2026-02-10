@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生成绩自动分班系统</title>
+    <title>ACA：智能分班系统</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
     <div class="container">
-        <!-- 头部 -->
         <header class="header">
             <div class="logo">
                 <div class="logo-icon">📊</div>
@@ -19,11 +18,10 @@
             <p class="subtitle">基于均衡蛇形算法的智能分班工具</p>
         </header>
 
-        <!-- 主内容区 -->
         <main class="main-content">
-            <!-- 上传区域 -->
-            <section class="upload-section" id="uploadSection">
-                <div class="upload-card">
+            <!-- Step 1: Upload -->
+            <section id="uploadSection">
+                <div class="card">
                     <div class="upload-icon">📁</div>
                     <h2>选择成绩文件夹</h2>
                     <p class="upload-hint">支持包含多个年级的嵌套文件夹结构</p>
@@ -37,42 +35,56 @@
                     </button>
 
                     <div class="selected-info" id="selectedInfo" style="display: none;">
-                        <span class="info-icon">✅</span>
+                        <span>✅</span>
                         <span id="fileCount">0</span> 个文件已选择
                     </div>
 
                     <button class="btn btn-success" id="uploadBtn" style="display: none;">
                         <span class="btn-icon">🚀</span>
-                        开始分班
+                        上传并解析
                     </button>
                 </div>
             </section>
 
-            <!-- 处理进度 -->
-            <section class="progress-section" id="progressSection" style="display: none;">
-                <div class="progress-card">
+            <!-- Step 2: Configure class sizes -->
+            <section id="configSection" style="display: none;">
+                <div class="config-card">
+                    <h2>⚙️ 分班配置</h2>
+                    <div id="gradeConfigList"></div>
+                    <div class="config-actions">
+                        <button class="btn btn-success" id="startAssignBtn">
+                            <span class="btn-icon">🚀</span>
+                            开始分班
+                        </button>
+                        <button class="btn btn-secondary" id="backBtn">
+                            <span class="btn-icon">↩️</span>
+                            返回
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 3: Progress -->
+            <section id="progressSection" style="display: none;">
+                <div class="card">
                     <div class="spinner"></div>
                     <h2>正在处理...</h2>
-                    <p id="progressText">正在解析文件并执行分班算法</p>
+                    <p id="progressText">正在执行分班算法</p>
                     <div class="progress-bar">
                         <div class="progress-fill" id="progressFill"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- 结果展示 -->
-            <section class="result-section" id="resultSection" style="display: none;">
-                <div class="result-card">
+            <!-- Step 4: Results -->
+            <section id="resultSection" style="display: none;">
+                <div class="card">
                     <div class="result-header">
                         <div class="result-icon">🎉</div>
                         <h2>分班完成！</h2>
                         <p id="resultSummary">处理结果摘要</p>
                     </div>
-
-                    <div class="result-list" id="resultList">
-                        <!-- 动态生成结果列表 -->
-                    </div>
-
+                    <div class="result-list" id="resultList"></div>
                     <div class="action-buttons">
                         <button class="btn btn-primary" id="downloadAllBtn">
                             <span class="btn-icon">📦</span>
@@ -86,9 +98,9 @@
                 </div>
             </section>
 
-            <!-- 错误提示 -->
-            <section class="error-section" id="errorSection" style="display: none;">
-                <div class="error-card">
+            <!-- Error -->
+            <section id="errorSection" style="display: none;">
+                <div class="card error-card">
                     <div class="error-icon">❌</div>
                     <h2>处理失败</h2>
                     <p id="errorMessage">发生未知错误</p>
@@ -100,7 +112,6 @@
             </section>
         </main>
 
-        <!-- 页脚 -->
         <footer class="footer">
             <p>均衡蛇形分班算法 · 确保各班总分和各科成绩均衡</p>
         </footer>
