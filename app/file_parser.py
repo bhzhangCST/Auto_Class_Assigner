@@ -10,34 +10,49 @@ from typing import Dict, List, Optional
 
 
 def auto_detect_headers(df: pd.DataFrame) -> Dict[str, str]:
-    """Auto-detect and standardize column headers."""
+    """Auto-detect and standardize column headers.
+    For unnamed columns, use positional defaults: 考号, 姓名, 语文, 数学, 英语, ...
+    """
     column_mapping = {}
     
     id_patterns = ['考号', '学号', '编号', '序号']
     name_patterns = ['姓名', '名字', '学生姓名']
     subject_patterns = ['语文', '数学', '英语', '科学', '道法', '品德', '体育', '音乐', '美术']
     
+    # Default positional order for unnamed columns
+    positional_defaults = ['考号', '姓名', '语文', '数学', '英语', '科学', '道法']
+    
+    # Track which names are already used (from named columns)
+    used_names = set()
+    for col in df.columns:
+        col_str = str(col).strip()
+        if col_str in subject_patterns or col_str in ['考号', '姓名']:
+            used_names.add(col_str)
+    
+    pos_idx = 0  # tracks position in positional_defaults
+    
     for idx, col in enumerate(df.columns):
         col_str = str(col).strip().lower()
         
-        # Handle unnamed columns first (by position + content heuristics)
+        # Handle unnamed columns: assign by positional defaults
         if 'unnamed' in col_str:
-            sample_data = df[col].dropna().head(10)
-            if len(sample_data) == 0:
+            # Skip columns that are mostly empty (trailing garbage columns)
+            non_null_ratio = df[col].notna().sum() / max(len(df), 1)
+            if non_null_ratio < 0.2:
                 continue
-                
-            if idx == 0:
-                if sample_data.apply(lambda x: isinstance(x, (int, float)) or str(x).isdigit()).all():
-                    column_mapping[col] = '考号'
-            elif idx == 1:
-                if sample_data.apply(lambda x: isinstance(x, str) and any('\u4e00' <= c <= '\u9fff' for c in str(x))).any():
-                    column_mapping[col] = '姓名'
-            else:
-                if pd.api.types.is_numeric_dtype(sample_data):
-                    column_mapping[col] = f'科目{idx-1}'
+            
+            # Skip positions that are already taken by named columns
+            while pos_idx < len(positional_defaults) and positional_defaults[pos_idx] in used_names:
+                pos_idx += 1
+            
+            if pos_idx < len(positional_defaults):
+                column_mapping[col] = positional_defaults[pos_idx]
+                used_names.add(positional_defaults[pos_idx])
+                pos_idx += 1
             continue
         
         # Named columns: match by known patterns
+        col_orig = str(col).strip()
         if any(p in col_str for p in id_patterns):
             column_mapping[col] = '考号'
         elif any(p in col_str for p in name_patterns):
@@ -47,6 +62,9 @@ def auto_detect_headers(df: pd.DataFrame) -> Dict[str, str]:
                 if p in col_str:
                     column_mapping[col] = p
                     break
+        
+        # Advance pos_idx past this column's position
+        pos_idx += 1
     
     return column_mapping
 

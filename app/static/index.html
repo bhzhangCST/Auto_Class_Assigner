@@ -24,8 +24,30 @@
                 <div class="card">
                     <div class="upload-icon">📁</div>
                     <h2>选择成绩文件夹</h2>
-                    <p class="upload-hint">支持包含多个年级的嵌套文件夹结构</p>
-                    <p class="upload-hint">文件格式：年级.班级.xlsx（如 3.1.xlsx）</p>
+
+                    <details class="usage-guide">
+                        <summary>📖 使用说明（点击展开）</summary>
+                        <div class="guide-content">
+                            <p><strong>文件夹结构：</strong></p>
+                            <pre>
+成绩文件夹/
+├── 三/          ← 年级文件夹（中文或数字均可）
+│   ├── 3.1.xlsx ← 年级.班级.xlsx
+│   ├── 3.2.xlsx
+│   └── ...
+├── 四/
+│   ├── 4.1.xlsx
+│   └── ...
+└── ...</pre>
+                            <p><strong>Excel 格式：</strong></p>
+                            <p>每个文件为一个班级的成绩表，列顺序为：</p>
+                            <p style="text-align:center; color: var(--primary); font-weight: 600;">
+                                考号 · 姓名 · 语文 · 数学 · 英语（如有）· ...
+                            </p>
+                            <p>表头可缺失，系统会按上述顺序自动识别。</p>
+                            <p><strong>特殊情况：</strong>成绩为"缺考"、"长期请假"等非数字，或各科均为 0 的学生将自动排除，单独列出。</p>
+                        </div>
+                    </details>
 
                     <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
 
