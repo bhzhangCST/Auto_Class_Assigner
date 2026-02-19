@@ -174,20 +174,13 @@ async def process(request: ProcessRequest):
                 big_count = total_classes
                 small_count = 0
 
-            # Calculate class size targets
-            if small_count > 0 and big_count > 0:
-                remaining = len(df) - small_count * small_size
-                # Filter out special students before calculating, but we need to
-                # let assign_classes handle the filtering
-                class_sizes = [max(1, round(remaining / big_count))] * big_count + [small_size] * small_count
-            elif big_count > 0:
-                base = len(df) // big_count
-                extra = len(df) % big_count
-                class_sizes = [base + (1 if i < extra else 0) for i in range(big_count)]
-            else:
-                class_sizes = [small_size] * small_count
-
-            result_df, special_df = assign_classes(df, class_sizes, subject_cols)
+            # Let assign_classes compute class_sizes internally after removing
+            # special students, so the sizes are based on actual normal count.
+            # Pass an empty list as class_sizes; the real sizes come from config.
+            result_df, special_df = assign_classes(
+                df, class_sizes=[], subject_cols=subject_cols,
+                big_count=big_count, small_count=small_count, small_size=small_size
+            )
 
             grade_name = grade_number_to_chinese(grade)
             result_file = generate_result_excel(
