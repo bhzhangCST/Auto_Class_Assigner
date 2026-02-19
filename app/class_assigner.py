@@ -331,10 +331,16 @@ def assign_classes(df: pd.DataFrame,
     """
     df = df.copy()
 
+    # Add unique internal ID for reliable mapping (考号 can be duplicated across classes)
+    df['_uid'] = range(len(df))
+
     # Step 1: Separate special students
     df, special_df = separate_special_students(df, subject_cols)
 
     if len(df) == 0:
+        df.drop(columns=['_uid'], inplace=True, errors='ignore')
+        if special_df is not None:
+            special_df.drop(columns=['_uid'], inplace=True, errors='ignore')
         return df, special_df
 
     # Step 2: Convert to numeric
@@ -421,16 +427,14 @@ def assign_classes(df: pd.DataFrame,
             best_score = score
             best_df = round_df.copy()
 
-    # Map the class assignments back to the original df order
-    # best_df has the shuffled order; we need to map by student identity
-    # Since round_df may be reordered, we use 考号 or index to map back
-    if '考号' in df.columns and '考号' in best_df.columns:
-        assignment_map = dict(zip(best_df['考号'], best_df['新班级']))
-        df['新班级'] = df['考号'].map(assignment_map)
-    else:
-        # Fallback: map by 姓名
-        assignment_map = dict(zip(best_df['姓名'], best_df['新班级']))
-        df['新班级'] = df['姓名'].map(assignment_map)
+    # Map class assignments back using unique _uid (safe even with duplicate 考号)
+    assignment_map = dict(zip(best_df['_uid'], best_df['新班级']))
+    df['新班级'] = df['_uid'].map(assignment_map)
+
+    # Clean up internal columns
+    df.drop(columns=['_uid'], inplace=True)
+    if special_df is not None:
+        special_df.drop(columns=['_uid'], inplace=True, errors='ignore')
 
     # Final safety: recalculate total score
     df['总分'] = calculate_total_score(df, subject_cols)
